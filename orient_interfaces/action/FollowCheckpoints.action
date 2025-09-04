@@ -1,0 +1,10 @@
+#goal definition
+string behavior_tree
+orient_interfaces/CheckPoint[] check_points
+geometry_msgs/PoseStamped[] poses
+---
+#result definition
+int32[] missed_checkpoints
+---
+#feedback definition
+int32 current_check_point

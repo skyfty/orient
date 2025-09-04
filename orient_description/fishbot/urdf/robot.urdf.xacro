@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="fishbot" >
+
+    <!-- create a virtual root link -->
+    <link name="base_footprint" />
+
+    <!-- instantiate r2300 macro -->
+    <link name="scanner_link" >
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <geometry>
+                <mesh filename="package://orient_description/fishbot/meshes/R2000.stl" scale="0.001 0.001 0.001" />
+            </geometry>
+        </visual>
+    </link>
+
+    <!-- connect world link to scanner link -->
+    <joint name="world_joint" type="fixed">
+        <parent link="base_footprint" />
+        <child link = "scanner_link" />
+        <origin xyz="0.0 0.0 0.10" rpy="0.0 0.0 0.0" />
+    </joint>
+</robot>

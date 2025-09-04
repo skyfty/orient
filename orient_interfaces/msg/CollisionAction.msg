@@ -1,0 +1,4 @@
+uint8 action_type
+uint8 ACTION_STOP=0
+uint8 ACTION_SLOWDOWN=1
+uint8 ACTION_APPROACH=2

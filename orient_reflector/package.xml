@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>orient_reflector</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="skyftyyjm@gmail.com">feitianyu</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>nav_2d_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>orient_interfaces</depend>
+  <depend>rclcpp_components</depend>
+  <depend>pcl_conversions</depend>
+  <depend>laser_geometry</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>nav2_util</depend>
+  <depend>map_io</depend>
+
+  <build_depend>liburdfdom-dev</build_depend>
+  <build_depend>liburdfdom-headers-dev</build_depend>
+
+  <exec_depend>liburdfdom-dev</exec_depend>
+  <depend>nav_2d_utils</depend>
+  <depend>yaml_cpp_vendor</depend>
+  <depend>eigen3_cmake_module</depend>
+  <depend>eigen</depend>
+  <depend>filters</depend>
+
+
+  <build_export_depend>tinyxml</build_export_depend>
+  <build_export_depend>tinyxml2</build_export_depend>
+  <build_export_depend>liburdfdom-headers-dev</build_export_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

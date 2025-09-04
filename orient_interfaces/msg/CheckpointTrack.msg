@@ -1,0 +1,4 @@
+std_msgs/Header header
+orient_interfaces/CheckPointState last
+orient_interfaces/CheckPointState next
+uint32 remains

@@ -1,0 +1,32 @@
+<library path="orient_rviz_plugins">
+
+  <class name="orient_rviz_plugins/ReflectorCloudDisplay"
+         type="orient_rviz_plugins::ReflectorCloudDisplay"
+         base_class_type="rviz_common::Display">
+    <description>show Reflector grid.</description>
+    <message_type>orient_interfaces/msg/ReflectorGrid</message_type>
+
+  </class>
+
+  <class name="orient_rviz_plugins/CheckPointsDisplay"
+         type="orient_rviz_plugins::CheckPointsDisplay"
+         base_class_type="rviz_common::Display">
+    <description>show all check point.</description>
+    <message_type>orient_interfaces/msg/CheckPointPoseMap</message_type>
+
+  </class>
+  <class name="orient_rviz_plugins/CurrentCheckPointsDisplay"
+         type="orient_rviz_plugins::CurrentCheckPointsDisplay"
+         base_class_type="rviz_common::Display">
+    <description>show current check point.</description>
+    <message_type>orient_interfaces/msg/CheckPointPose</message_type>
+
+  </class>
+  <class name="orient_rviz_plugins/AckermannBackupPathDisplay"
+         type="orient_rviz_plugins::AckermannBackupPathDisplay"
+         base_class_type="rviz_common::Display">
+    <description>show ackermann backup path.</description>
+    <message_type>orient_interfaces/msg/AckermannBackupPath</message_type>
+
+  </class>
+</library>

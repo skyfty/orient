@@ -1,0 +1,8 @@
+<library path="motions_lib">
+  <class type="orient_amcl::DifferentialMotionModel" base_class_type="orient_amcl::MotionModel">
+    <description>This is a diff plugin.</description>
+  </class>
+  <class type="orient_amcl::OmniMotionModel" base_class_type="orient_amcl::MotionModel">
+    <description>This is a omni plugin.</description>
+  </class>
+</library>

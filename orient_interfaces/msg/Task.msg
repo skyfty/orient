@@ -1,0 +1,3 @@
+string clientid
+string behavior
+rmf_fleet_msgs/PathRequest path_request

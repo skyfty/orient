@@ -1,0 +1,52 @@
+<class_libraries>
+    <library path="orient_regulated_pure_pursuit_controller">
+        <class type="orient_controller::RegulatedPurePursuitController" base_class_type="nav2_core::Controller">
+            <description>
+                orient_regulated_pure_pursuit_controller
+            </description>
+        </class>
+    </library>
+    <library path="orient_ackermann_controller">
+        <class type="orient_controller::AckermannController" base_class_type="nav2_core::Controller">
+            <description>
+                orient_ackermann_controller
+            </description>
+        </class>
+    </library>
+
+    <library path="orient_ackermann_backup_controller">
+        <class type="orient_controller::AckermannBackupController" base_class_type="nav2_core::Controller">
+            <description>
+                orient_ackermann_backup_controller
+            </description>
+        </class>
+    </library>
+    
+    <library path="orient_rotation_shim_controller">
+        <class type="orient_controller::RotationShimController" base_class_type="nav2_core::Controller">
+            <description>
+                orient_rotation_shim_controller
+            </description>
+        </class>
+    </library>
+    <library path="orient_aline_shim_controller">
+        <class type="orient_controller::AlineShimController" base_class_type="nav2_core::Controller">
+            <description>
+                orient_aline_shim_controller
+            </description>
+        </class>
+    </library>
+
+    <library path="goal_checker">
+      <class type="orient_controller::GoalChecker" base_class_type="nav2_core::GoalChecker">
+        <description></description>
+      </class>
+    </library>
+
+    <library path="position_goal_checker">
+      <class type="orient_controller::PositionGoalChecker" base_class_type="nav2_core::GoalChecker">
+        <description></description>
+      </class>
+    </library>
+</class_libraries>
+

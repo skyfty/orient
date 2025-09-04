@@ -1,0 +1,11 @@
+string name
+string level
+uint32 x
+uint32 y
+uint32 z
+uint32 index
+bool is_holding_point
+bool is_charger
+bool is_parking_spot
+bool is_passthrough_point
+string dock_name

@@ -1,0 +1,4 @@
+orient_interfaces/CheckPoint checkpoint
+bool state
+---
+bool result

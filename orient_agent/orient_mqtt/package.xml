@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>orient_mqtt</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="38198234+skyfty@users.noreply.github.com">sky</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>orient_reflector</depend>
+  <depend>orient_monitor</depend>
+  <depend>orient_checkpoint</depend>
+
+  <depend>orient_interfaces</depend>
+  <depend>nav_msgs</depend>
+  <depend>nav2_util</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>rclcpp_components</depend>
+  <depend>yaml_cpp_vendor</depend>
+
+  <depend>rmf_fleet_msgs</depend>
+  <depend>rmf_dispenser_msgs</depend>
+  <depend>rmf_ingestor_msgs</depend>
+  <depend>rmf_building_map_msgs</depend>
+  <depend>libpaho-mqtt-dev</depend>
+  <depend >libpaho-mqttpp-dev</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

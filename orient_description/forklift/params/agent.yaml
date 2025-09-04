@@ -1,0 +1,16 @@
+orient_agent_mqtt:
+  ros__parameters:
+    broker:
+      host: 192.168.0.10
+      port: 1883
+    client:
+      ip: 192.168.0.64
+      # Whether or not to start a clean session with each reconnect.
+      # If True, the server will forget all subscriptions with each reconnect.
+      # Set False to request that the server resume an existing session or start
+      # a new session that may be resumed after a connection loss.
+      clean_session: false
+      # The keep alive value, in seconds, to send in CONNECT packet.
+      keep_alive_interval: 6.0
+      buffer:
+        enabled: true

@@ -1,0 +1,7 @@
+#goal definition
+rmf_fleet_msgs/PathRequest path_request
+---
+#result definition
+orient_interfaces/CheckPointState[] track
+geometry_msgs/Pose[] poses
+uint32 start_path

@@ -1,0 +1,40 @@
+
+<!--
+  This Behavior Tree replans the global path periodically at 1 Hz through an array of poses continuously
+   and it also has recovery actions specific to planning / control as well as general system issues.
+-->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence>
+      <ComputePathThroughPoses goals="{goals}" path="{path}" planner_id="Checkpoint"/>
+      <RecoveryNode number_of_retries="20" name="ComputePathToPose">
+        <PipelineSequence>
+          <Sequence>
+            <GetRobotPose robot_pose="{robot_pose}" />
+            <GetCheckPointTrack next_checkpoint="{next_checkpoint}" last_checkpoint="{last_checkpoint}"/>
+            <ReactiveFallback>
+              <IsCheckPointTrackEmpty />
+              <IsCheckPointEmployed checkpoint="{next_checkpoint}" />
+              <Sequence>
+                <IsCheckPointFree checkpoint="{next_checkpoint}" />
+                <SetCheckPointState checkpoint="{next_checkpoint}" state="true" />
+              </Sequence>
+            </ReactiveFallback>
+            <ForceSuccess>
+              <ReactiveSequence>
+                <IsCheckPointEmployed checkpoint="{last_checkpoint}" />
+                <DistanceCheckPoint checkpoint="{last_checkpoint}" robot_pose="{robot_pose}" distance="0.5" />
+                <SetCheckPointState checkpoint="{last_checkpoint}" state="false" />
+              </ReactiveSequence>
+            </ForceSuccess>
+          </Sequence>
+          <FollowPath path="{path}" controller_id="FollowPath"  goal_checker_id="orient_goal_checker"/>
+        </PipelineSequence>
+        <Sequence>
+          <TruncatePath robot_pose="{robot_pose}" input_path="{path}" output_path="{path}"/>
+          <Wait wait_duration="5"/>
+        </Sequence>
+      </RecoveryNode>
+    </Sequence>
+  </BehaviorTree>
+</root>

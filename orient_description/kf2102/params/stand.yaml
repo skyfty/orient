@@ -1,0 +1,110 @@
+orient_robot_localization_node:
+  ros__parameters:
+    # The frequency, in Hz, at which the filter will output a position estimate. Note that the filter will not begin
+    # computation until it receives at least one message from one of the inputs. It will then run continuously at the
+    # frequency specified here, regardless of whether it receives more measurements. Defaults to 30 if unspecified.
+    frequency: 30.0
+
+    # The period, in seconds, after which we consider a sensor to have timed out. In this event, we carry out a predict
+    # cycle on the EKF without correcting it. This parameter can be thought of as the minimum frequency with which the
+    # filter will generate new output. Defaults to 1 / frequency if not specified.
+    sensor_timeout: 0.1          # 传感器超时时间
+
+    # ekf_localization_node and ukf_localization_node both use a 3D omnidirectional motion model. If this parameter is
+    # set to true, no 3D information will be used in your state estimate. Use this if you are operating in a planar
+    # environment and want to ignore the effect of small variations in the ground plane that might otherwise be detected
+    # by, for example, an IMU. Defaults to false if unspecified.
+    two_d_mode: true
+
+    # If you're having trouble, try setting this to true, and then echo the /diagnostics_agg topic to see if the node is
+    # unhappy with any settings or data.
+    print_diagnostics: true
+
+    # Debug settings. Not for the faint of heart. Outputs a ludicrous amount of information to the file specified by
+    # debug_out_file. I hope you like matrices! Please note that setting this to true will have strongly deleterious
+    # effects on the performance of the node. Defaults to false if unspecified.
+    debug: false
+    map_frame: map              # Defaults to "map" if unspecified
+    odom_frame: odom            # Defaults to "odom" if unspecified
+    base_link_frame: base_footprint  # Defaults to "base_link" if unspecified
+    world_frame: odom           # Defaults to the value of odom_frame if unspecified
+
+
+    pose0: reflector_pose
+    pose0_config: [true,  true,  false,
+                    false, false, true,
+                    false, false, false,
+                    false, false, false,
+                    false, false, false]
+    pose0_pose_covariance_diagonal: [0.01, 0.01, 0.0, 0.0, 0.0, 0.01] # 反光柱位姿协方差
+    pose0_twist_covariance_diagonal: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # 反光柱速度协方差
+
+    pose1: /tracked_pose
+    pose1config: [true,  true,  false,
+                    false, false, true,
+                    false, false, false,
+                    false, false, false,
+                    false, false, false]
+    pose1_pose_covariance_diagonal: [0.6, 0.6, 0.0, 0.0, 0.0, 0.6] # 反光柱位姿协方差
+    pose1_twist_covariance_diagonal: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # 反光柱速度协方差
+
+reflector_localization_server:
+  ros__parameters:
+    use_sim_time: True  # 是否使用仿真时间
+    detect_logs: False  # 是否记录检测日志
+    reflector_filename: ""  # 反光板地图文件的路径（留空表示无）
+    publish_tf: True  # 是否发布帧之间的变换（TF）
+    tolerance: 0.1  # 匹配反光板的容差，两点间距离≤tolerance则视为同一簇。(单位：米)
+    min_cluster: 3  # 被认为是反光板的最小点数
+    max_cluster: 40  # 被认为是反光板的最大点数
+    min_diameter: 0.04  # 反光板的最小直径（单位：米）
+    max_diameter: 0.10  # 反光板的最大直径（单位：米）
+    min_intensity: 70.0  # 反光板的最小强度值
+    max_intensity: 1000.0  # 反光板的最大强度值
+    map_frame: map  # 地图帧的名称
+    base_link_frame: base_footprint  # 基础链接帧的名称
+    odom_frame: odom  # 里程计帧的名称
+    publish_odom: "odometry/reflector"  # 发布里程计数据的主题名称
+    provide_odom_frame: True  # 是否提供里程计帧
+    publish_map: False  # 是否发布地图
+    publish_pose: True  # 是否发布机器人的位姿
+    set_initial_pose: True  # 是否设置机器人的初始位姿
+    min_observed_frames: 4  # 确认反光板的最小帧数
+    max_miss_frames: 3  # 反光板在被移除前允许丢失的最大帧数
+    match_distance_thresh: 0.2  # 用于匹配反光板的距离阈值（单位：米）
+    max_age_seconds: 3.0  # 反光板的最大存在时间（单位：秒），超过此时间将被移除
+    net_match_distance: 0.1  # 用于匹配反光板的网络距离阈值（单位：米）
+    net_match_angle: 0.2  # 用于匹配反光板的网络角度阈值（单位：弧度）
+    pose_window_size: 3  # 用于位姿滤波器的窗口大小
+    twist_window_size: 3  # 用于速度滤波器的窗口大小
+    accel_window_size: 3  # 用于加速度滤波器的窗口大小
+    linear_accel_thresh: 3.7  # 线速度阈值（单位：米/秒）
+    angular_accel_thresh: 0.8  # 角速度阈值（单位：弧度/秒）
+
+orient_laser_reflector_recognize_filters_server:
+  ros__parameters:
+    outout_topic: scan/filtered/reflector  # 输出主题
+    filter1:
+      name: range  # 滤波器名称：范围滤波器
+      type: laser_filters/LaserScanRangeFilter  # 滤波器类型
+      params:
+        use_message_range_limits: false  # 是否使用消息中的范围限制（默认为 false）
+        lower_threshold: 0.2  # 范围的下限（默认为 0.0）
+        upper_threshold: 30.0  # 范围的上限（默认为 100000.0）
+        lower_replacement_value: -.inf  # 超出下限时的替换值（默认为 NaN）
+        upper_replacement_value: .inf  # 超出上限时的替换值（默认为 NaN）
+    filter2:
+      name: intensity  # 滤波器名称：强度滤波器
+      type: laser_filters/LaserScanIntensityFilter  # 滤波器类型
+      params:
+        lower_threshold: 610.  # 强度的下限
+        upper_threshold: 2000.  # 强度的上限
+        disp_histogram: 0  # 是否显示直方图
+    filter3:
+      name: shadows  # 滤波器名称：阴影滤波器
+      type: laser_filters/ScanShadowsFilter  # 滤波器类型
+      params:
+        min_angle: 5.  # 最小角度
+        max_angle: 175.  # 最大角度
+        neighbors: 4  # 邻居点数
+        window: 4  # 窗口大小

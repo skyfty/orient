@@ -1,0 +1,506 @@
+govern_server:
+  ros__parameters:
+    use_sim_time: True
+    global_frame: "map"
+    timeout: 6.0
+    robot_base_frame: base_footprint
+    odom_topic: odom
+    bt_loop_duration: 200
+    default_server_timeout: 100
+    wait_for_service_timeout: 10000
+    plugin_lib_names:
+      - nav2_compute_path_to_pose_action_bt_node
+      - nav2_compute_path_through_poses_action_bt_node
+      - nav2_smooth_path_action_bt_node
+      # - nav2_follow_path_action_bt_node
+      - nav2_spin_action_bt_node
+      - nav2_wait_action_bt_node
+      - nav2_back_up_action_bt_node
+      - nav2_drive_on_heading_bt_node
+      - nav2_clear_costmap_service_bt_node
+      - nav2_is_stuck_condition_bt_node
+      - nav2_goal_reached_condition_bt_node
+      - nav2_goal_updated_condition_bt_node
+      - nav2_globally_updated_goal_condition_bt_node
+      - nav2_is_path_valid_condition_bt_node
+      - nav2_initial_pose_received_condition_bt_node
+      - nav2_reinitialize_global_localization_service_bt_node
+      - nav2_rate_controller_bt_node
+      - nav2_distance_controller_bt_node
+      - nav2_speed_controller_bt_node
+      # - nav2_truncate_path_action_bt_node
+      # - nav2_truncate_path_local_action_bt_node
+      # - nav2_goal_updater_node_bt_node
+      - nav2_recovery_node_bt_node
+      - nav2_pipeline_sequence_bt_node
+      - nav2_round_robin_node_bt_node
+      - nav2_transform_available_condition_bt_node
+      - nav2_time_expired_condition_bt_node
+      - nav2_path_expiring_timer_condition
+      - nav2_distance_traveled_condition_bt_node
+      - nav2_single_trigger_bt_node
+      - nav2_goal_updated_controller_bt_node
+      - nav2_is_battery_low_condition_bt_node
+      - nav2_navigate_through_poses_action_bt_node
+      - nav2_navigate_to_pose_action_bt_node
+      - nav2_remove_passed_goals_action_bt_node
+      - nav2_planner_selector_bt_node
+      - nav2_controller_selector_bt_node
+      - nav2_goal_checker_selector_bt_node
+      - nav2_controller_cancel_bt_node
+      - nav2_path_longer_on_approach_bt_node
+      - nav2_wait_cancel_bt_node
+      - nav2_spin_cancel_bt_node
+      - nav2_back_up_cancel_bt_node
+      - nav2_drive_on_heading_cancel_bt_node
+      - nav2_is_battery_charging_condition_bt_node
+      - orient_is_checkpoint_employed_condition_node
+      - orient_is_checkpoint_free_condition_node
+      - orient_set_checkpoint_state_action_node
+      - orient_is_checkpoint_track_empty_condition_node
+      - orient_get_checkpoint_track_condition_node
+      - orient_get_robot_pose_node
+      - orient_distance_checkpoint_condition_node
+      - orient_forklift_action_node
+      - orient_follow_path_action_node
+      - orient_truncate_path_action_node
+
+
+controller_server:
+  ros__parameters:
+    use_sim_time: True
+    controller_frequency: 50.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["orient_goal_checker","orient_position_goal_checker"] # "precise_goal_checker"
+    controller_plugins: ["FollowPath", "Backup"]
+
+    # Progress checker parameters
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.5
+      movement_time_allowance: 100.0
+      
+    orient_position_goal_checker:
+      plugin: "orient_controller::PositionGoalChecker"
+      xy_goal_tolerance: 0.1
+      radius: 0.1
+
+    orient_goal_checker:
+      plugin: "orient_controller::GoalChecker"
+      xy_goal_tolerance: 0.1
+      yaw_goal_tolerance: 1.0
+      radius: 0.1
+
+    FollowPath:
+      plugin: "orient_controller::AckermannController"
+      position_checker:
+        xy_goal_tolerance: 0.1 # XY目标容差
+        stateful: true
+      desired_linear_vel: 0.7 # 期望的线速度
+      lookahead_dist: 1.2 # 前瞻距离
+      min_lookahead_dist: 1.0 # 最小前瞻距离
+      max_lookahead_dist: 2.0 # 最大前瞻距离
+      lookahead_time: 1.0 # 前瞻时间
+      transform_tolerance: 0.2 # 坐标变换的容差
+      use_velocity_scaled_lookahead_dist: False # 是否使用速度缩放的前瞻距离
+      min_approach_linear_velocity: 0.05 # 最小接近目标的线速度
+      approach_velocity_scaling_dist: 2.0 # 接近目标时速度缩放的距离
+      max_allowed_time_to_collision_up_to_carrot: 1.0 # 到达前瞻点的最大允许碰撞时间
+      use_regulated_linear_velocity_scaling: True # 是否使用受限的线速度缩放
+      use_fixed_curvature_lookahead: False # 是否使用固定曲率的前瞻
+      curvature_lookahead_dist: 0.25 # 曲率前瞻距离
+      use_cost_regulated_linear_velocity_scaling: False # 是否使用基于代价的线速度缩放
+      regulated_linear_scaling_min_radius: 2.79252 # 受限线速度缩放的最小半径（默认0.9米）时，线速度会逐步降低至
+      regulated_linear_scaling_min_speed: 0.15 # 受限线速度缩放的最小速度
+      use_rotate_to_heading: False # 是否启用旋转到目标方向
+      allow_reversing: False # 是否允许倒车
+      rotate_to_heading_min_angle: 0.32 # 旋转到目标方向的最小角度
+      max_robot_pose_search_dist: 10.0 # 最大机器人位姿搜索距离
+      use_interpolation: False # 是否使用插值
+      wheelbase: 1.7 # 车辆轴距
+      max_steering_angle: 0.6981317007977318 # 最大转向角度（弧度）
+      steering_angle_scaling: 2.0
+
+    Backup:
+      plugin: "orient_controller::AckermannBackupController"
+      max_angular_accel: 1.0 # 最大角加速度
+      simulate_ahead_time: 1.3 # 模拟前瞻时间
+      position_checker:
+        xy_goal_tolerance: 0.2 # XY目标容差
+        stateful: true
+      allow_reversing: True # 是否允许倒车   
+      use_regulated_linear_velocity_scaling: True # 是否使用受限的线速度缩放
+      use_cost_regulated_linear_velocity_scaling: False # 是否使用基于代价的线速度缩放
+      use_fixed_curvature_lookahead: False # 是否使用固定曲率的前瞻
+      curvature_lookahead_dist: 0.3 # 曲率前瞻距离
+      regulated_linear_scaling_min_radius: 2.14 # 受限线速度缩放的最小半径（默认0.9米）时，线速度会逐步降低至
+      regulated_linear_scaling_min_speed: 0.15 # 受限线速度缩放的最小速度
+      use_velocity_scaled_lookahead_dist: False # 是否使用速度缩放的前瞻距离
+      use_rotate_to_heading: False # 是否启用旋转到目标方向
+      desired_linear_vel: 0.5 # 期望的线速度
+      min_approach_linear_velocity: 0.05 # 最小接近目标的线速度
+      transform_tolerance: 0.2 # 坐标变换的容差
+      wheelbase: 1.7 # 车辆轴距
+      max_steering_angle: 0.6981317007977318 # 最大转向角度（弧度）
+      lookahead_dist: 1.5 # 前瞻距离
+      min_lookahead_dist: 0.5 # 最小前瞻距离
+      max_lookahead_dist: 1.5 # 最大前瞻距离
+      steering_angle_scaling: 1.0
+      approach_velocity_scaling_dist: 2.0 # 接近目标时速度缩放的距离
+      lookahead_time: 1.0 # 前瞻时间
+      steering_angle_threshold: 1.0 # 转向角阈值，单位为弧度
+
+   
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: True
+      update_frequency: 1.0
+      publish_frequency: 0.5
+      transform_tolerance: 0.8 # 坐标变换的容差
+      global_frame: odom
+      robot_base_frame: base_footprint
+      rolling_window: True
+      track_unknown_space: False
+      width: 3
+      height: 3
+      resolution: 0.05
+      robot_radius: 1.3
+      footprint: "[ [1.3, 1.3], [1.3, -01.3], [-1.3, -1.3], [-1.3, 1.3] ]"
+      plugins: ["inflation_layer"]
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        publish_voxel_map: True
+        origin_z: 0.0
+        z_resolution: 0.05
+        z_voxels: 16
+        max_obstacle_height: 2.0
+        mark_threshold: 0
+        enabled: False
+        observation_sources: scan
+        scan:
+          topic: scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.6
+        inflate_unknown: True
+        enabled: False
+      always_send_full_costmap: True
+
+behavior_server:
+  ros__parameters:
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+    cycle_frequency: 10.0
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "wait", "forklift"]
+    spin:
+      plugin: "nav2_behaviors/Spin"
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors/DriveOnHeading"
+      acceleration_limit: 0.0
+      deceleration_limit: 0.0
+      minimum_speed: 0.0
+    wait:
+      plugin: "nav2_behaviors/Wait"
+    forklift:
+      plugin: "nav2_behaviors/Forklift"
+    global_frame: odom
+    robot_base_frame: base_footprint
+    transform_tolerance: 0.1
+    use_sim_time: True
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 0.5
+    min_rotational_vel: 0.2
+    rotational_acc_lim: 3.2
+
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: True
+    smoothing_frequency: 30.0
+    scale_velocities: False
+    feedback: "OPEN_LOOP"
+    max_velocity: [1.0, 0.0, 3.14]
+    min_velocity: [-1.0, 0.0, -3.14]
+    max_accel: [0.5, 0.0, 1.5]
+    max_decel: [-0.5, 0.0, -1.5]
+    odom_topic: "odom"
+    odom_duration: 0.1
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0
+
+orient_monitor_server:
+  ros__parameters:
+    use_sim_time: True
+    base_frame_id: "base_footprint"
+    odom_frame_id: "odom"
+    cmd_vel_in_topic: "cmd_vel_smoothed"
+    cmd_vel_out_topic: "cmd_vel"
+    transform_tolerance: 0.5
+    source_timeout: 5.0
+    base_shift_correction: True
+    stop_pub_timeout: 2.0
+    # Polygons represent zone around the robot for "stop" and "slowdown" action types,
+    # and robot footprint for "approach" action type.
+    # Footprint could be "polygon" type with dynamically set footprint from footprint_topic
+    # or "circle" type with static footprint set by radius. "footprint_topic" parameter
+    # to be ignored in circular case.
+    polygons: ["PolygonStop", "PolygonSlow"]
+    PolygonStop:
+      type: "polygon"
+      points: [2.0, 2.0, 2.0, -2.0, -2.0, -2.0, -2.0, 2.0]
+      action_type: "stop"
+      max_points: 7
+      visualize: True
+      polygon_pub_topic: "polygon_stop"
+      enabled: True
+    PolygonSlow:
+      type: "polygon"
+      points: [2.5, 2.5, 2.5, -2.5, -2.5, -2.5, -2.5, 2.5]
+      action_type: "slowdown"
+      max_points: 3
+      slowdown_ratio: 0.3
+      visualize: True
+      polygon_pub_topic: "polygon_slowdown"
+      enabled: True
+    observation_sources: ["scan"]
+    scan:
+      type: "scan"
+      topic: "scan/filtered"
+      enabled: True
+    
+    impact:
+      type: "impact"
+      topic: "checkpoint_pose"
+      enabled: True
+    gpio:
+      type: "gpio"
+      pins: [880, 890, 882]  # GPIO pins for collision detection
+      enabled: True
+
+
+checkpoint_server:
+  ros__parameters:
+    use_sim_time: True
+    global_frame: "map"
+    robot_base_frame: "base_footprint"
+    frequency: 0.3
+    match_distance_thresh: 0.4
+    tolerance: 1.0e-10
+    max_its: 1000
+    do_refinement: True
+
+laser_scan_matcher:
+  ros__parameters:
+    use_sim_time: True
+    map_frame: "map"
+    base_frame: "base_footprint"
+    odom_frame: "odom"
+    publish_tf: False
+    laser_frame: "scanner_link"
+    publish_odom: "odometry/laser_scan_matcher"
+
+orient_laser_odometry:
+  ros__parameters:
+    use_sim_time: True
+    laser_scan_topic: "scan/filtered"
+    odom_topic: "odometry/rf2o"
+    publish_tf: False
+    base_frame_id: "base_footprint"
+    odom_frame_id: "odom"
+    init_pose_from_topic: ""
+    freq: 20.0
+
+amcl:
+  ros__parameters:
+    use_sim_time: True
+    set_initial_pose: True
+    alpha1: 0.2
+    alpha2: 0.2
+    alpha3: 0.2
+    alpha4: 0.2
+    alpha5: 0.2
+    base_frame_id: "base_footprint"
+    beam_skip_distance: 0.5
+    beam_skip_error_threshold: 0.9
+    beam_skip_threshold: 0.3
+    do_beamskip: False
+    global_frame_id: "map"
+    lambda_short: 0.1
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 100.0
+    laser_min_range: -1.0
+    laser_model_type: "likelihood_field_prob"
+    max_beams: 60
+    max_particles: 2000
+    min_particles: 500
+    odom_frame_id: "odom"
+    pf_err: 0.05
+    pf_z: 0.99
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
+    resample_interval: 1
+    robot_model_type: "orient_amcl::DifferentialMotionModel"
+    save_pose_rate: 0.5
+    sigma_hit: 0.2
+    tf_broadcast: True
+    transform_tolerance: 1.0
+    update_min_a: 0.2
+    update_min_d: 0.25
+    z_hit: 0.5
+    z_max: 0.05
+    z_rand: 0.5
+    z_short: 0.05
+    scan_topic: "scan/filtered"
+
+
+    
+reflector_localization_server:
+  ros__parameters:
+    use_sim_time: True  # 是否使用仿真时间
+    reflector_filename: ""  # 反光板地图文件的路径（留空表示无）
+    publish_tf: True  # 是否发布帧之间的变换（TF）
+    publish_odom_tf: False
+    map_frame: "map"  # 地图帧的名称
+    base_link_frame: "base_footprint"  # 基础链接帧的名称
+    odom_frame: "odom"  # 里程计帧的名称
+    publish_map: False  # 是否发布地图
+    publish_pose: True  # 是否发布机器人的位姿
+    detect_logs: False  # 是否记录检测日志
+    tolerance: 0.1  # 匹配反光板的容差，两点间距离≤tolerance则视为同一簇。(单位：米)
+    min_cluster: 3  # 被认为是反光板的最小点数
+    max_cluster: 40  # 被认为是反光板的最大点数
+    min_diameter: 0.04  # 反光板的最小直径（单位：米）
+    max_diameter: 0.10  # 反光板的最大直径（单位：米）
+    min_intensity: 90.0  # 反光板的最小强度值
+    max_intensity: 2000.0  # 反光板的最大强度值
+    min_observed_frames: 1  # 确认反光板的最小帧数
+    max_miss_frames: 2  # 反光板在被移除前允许丢失的最大帧数
+    match_distance_thresh: 0.5  # 用于匹配反光板的距离阈值（单位：米）
+    max_age_seconds: 3.0  # 反光板的最大存在时间（单位：秒），超过此时间将被移除
+    net_match_distance: 0.1  # 用于匹配反光板的网络距离阈值（单位：米）
+    net_match_angle: 0.2  # 用于匹配反光板的网络角度阈值（单位：弧度）
+    pose_window_size: 3  # 用于位姿滤波器的窗口大小
+    twist_window_size: 3  # 用于速度滤波器的窗口大小
+    accel_window_size: 3  # 用于加速度滤波器的窗口大小
+    linear_accel_thresh: 1.9  # 线速度阈值（单位：米/秒）
+    angular_accel_thresh: 1.6  # 角速度阈值（单位：弧度/秒）
+    position_delta: 0.02  # 反光板抖动阈值（单位：米），用于判断反光板是否稳定
+    angle_delta: 0.2
+    
+robot_localization_node:
+  ros__parameters:
+    map_frame: "map"
+    odom_frame: "odom"
+    base_link_frame: "base_footprint"
+    world_frame: "odom"  # 融合后输出 odom->base_link
+
+    imu0: "imu/data"  # IMU 数据主题
+    imu0_config: [False, False, False,  # x, y, z (不使用位置)
+                  True,  True,  True,   # roll, pitch, yaw
+                  False, False, False,  # vx, vy, vz (不使用速度)
+                  False, False, False]   # vroll, vpitch, vyaw (不使用角速度)
+    imu0_pose_rejection_threshold: 5.0  # IMU 位姿拒绝阈值
+    imu0_timeout: 1.0  # IMU 数据超时 (秒)
+
+    odom0: "odometry/rf2o" 
+    odom0_config: [True,  True,  False,  # x, y, z
+                   False, False, True,   # roll, pitch, yaw (仅用yaw)
+                   False,  False,  False,  # vx, vy, vz
+                   False, False, False]   # vroll, vpitch, vyaw (仅用vyaw)
+    odom0_pose_rejection_threshold: 5.0    # 雷达里程计位姿拒绝阈值
+    odom0_timeout: 1.0                      # 雷达里程计数据超时 (秒)
+    odom0_differential: True  # 启用差分模式
+    odom0_relative: False
+    odom0_pose_noise: 0.1 # 雷达里程计位姿噪声 (米)
+
+    odom1: "odometry/sim" 
+    odom1_config: [True,  True,  False,  # x, y, z
+                   False, False, True,   # roll, pitch, yaw (仅用yaw)
+                   True,  True,  False,  # vx, vy, vz
+                   False, False, True]   # vroll, vpitch, vyaw (仅用vyaw)
+    odom1_pose_rejection_threshold: 5.0    # 雷达里程计位姿拒绝阈值
+    odom1_timeout: 1.0                      # 雷达里程计数据超时 (秒)
+    odom1_differential: True  # 启用差分模式
+    odom1_relative: False
+    odom1_pose_noise: 0.1 # 雷达里程计位姿噪声 (米)
+
+    pose0: "reflector_pose"   # 反光柱全局位姿 (低频)
+    pose0_config: [True,  True,  False,  # x, y, z (仅用x,y)
+                   False, False, True,   # roll, pitch, yaw (仅用yaw)
+                   False, False, False,  # 速度不使用
+                   False, False, False]
+    pose0_pose_rejection_threshold: 10.0   # 反光柱位姿拒绝阈值
+    pose0_timeout: 1.0                     # 反光柱数据超时 (秒)
+    pose0_pose_noise: 0.01 # 反光柱位姿噪声 (米)
+
+    pose1: "amcl_pose"  # AMCL 位姿 (中频)
+    pose1_config: [True,  True,  False,  # x, y, z (仅用x,y)
+                   False, False, True,   # roll, pitch, yaw (仅用yaw)
+                   False, False, False,  # 速度不使用
+                   False, False, False]
+    pose1_pose_rejection_threshold: 5.0    # AMCL 位姿拒绝阈值
+    pose1_timeout: 0.5                     # AMCL 数据超时 (秒) 
+
+    process_noise_covariance: [0.05, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.05, 0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.06, 0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.03, 0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.03, 0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.06, 0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.025, 0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.025, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.04, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.01, 0.0,    0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.01, 0.0,    0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.02, 0.0,    0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.01, 0.0,    0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.01, 0.0,
+                                0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.015]
+
+    frequency: 40.0                        # EKF更新频率 (>=最高传感器频率)
+    two_d_mode: True                       # 2D模式 (忽略Z轴/俯仰/横滚)
+    publish_tf: True                       # 发布 TF 变换
+    print_diagnostics: False                # 输出诊断信息
+
+orient_laser_reflector_recognize_filters_server:
+  ros__parameters:
+    outout_topic: "scan/filtered/reflector"  # 输出主题
+    filter1:
+      name: "range"  # 滤波器名称：范围滤波器
+      type: "laser_filters/LaserScanRangeFilter"  # 滤波器类型
+      params:
+        use_message_range_limits: False  # 是否使用消息中的范围限制（默认为 false）
+        lower_threshold: 0.2  # 范围的下限（默认为 0.0）
+        upper_threshold: 30.0  # 范围的上限（默认为 100000.0）
+        lower_replacement_value: -.inf  # 超出下限时的替换值（默认为 NaN）
+        upper_replacement_value: .inf  # 超出上限时的替换值（默认为 NaN）
+    filter2:
+      name: "intensity"  # 滤波器名称：强度滤波器
+      type: "laser_filters/LaserScanIntensityFilter"  # 滤波器类型
+      params:
+        lower_threshold: 510.  # 强度的下限
+        upper_threshold: 2000.  # 强度的上限
+        disp_histogram: 0  # 是否显示直方图
+    filter3:
+      name: "shadows"  # 滤波器名称：阴影滤波器
+      type: "laser_filters/ScanShadowsFilter"  # 滤波器类型
+      params:
+        min_angle: 5.  # 最小角度
+        max_angle: 175.  # 最大角度
+        neighbors: 4  # 邻居点数
+        window: 4  # 窗口大小

@@ -1,0 +1,4 @@
+string clientid
+orient_interfaces/CheckPoint point
+geometry_msgs/Point position
+bool state
