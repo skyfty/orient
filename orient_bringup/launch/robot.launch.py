@@ -9,21 +9,31 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from orient_common.launch import ReplacePath
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, EnvironmentVariable
 from launch.substitutions import Command, LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import UnlessCondition
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, EnvironmentVariable
 from launch.substitutions import TextSubstitution
 
 def generate_launch_description():
-    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
+    bringup_dir = get_package_share_directory('orient_bringup')
     orient_description_share_dir = get_package_share_directory('orient_description')
+    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     log_level = LaunchConfiguration('log_level', default="info")
     namespace = LaunchConfiguration('namespace', default='')
+    
+    urdf_model_path = PathJoinSubstitution([
+        orient_description_share_dir,
+        description_name,
+        TextSubstitution(text='model.urdf.xacro'),
+    ])
 
-    urdf_model_path = PathJoinSubstitution([orient_description_share_dir ,description_name, 'model.urdf.xacro'])
+    remappings = [
+        ('/tf', 'tf'),
+        ('/tf_static', 'tf_static'),
+    ]           
     ld = LaunchDescription()
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -31,6 +41,13 @@ def generate_launch_description():
         default_value='true',
         description='Use simulation (Gazebo) clock if true')
     ld.add_action(declare_use_sim_time_cmd)
+    
+    
+    declare_namespace_cmd = DeclareLaunchArgument(
+        'namespace',
+        default_value='',
+        description='Namespace for the robot')
+    ld.add_action(declare_namespace_cmd)
 
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
@@ -38,12 +55,26 @@ def generate_launch_description():
         arguments=['--ros-args', '--log-level', log_level],
         parameters=[{
             'use_sim_time': use_sim_time,
-            'robot_description': Command(['xacro ', urdf_model_path])
+            'robot_description': Command(['xacro ', urdf_model_path, ' namespace:=', namespace]),
         }],
+        remappings=remappings,
         namespace=namespace,
         output='both',
     )   
     ld.add_action(robot_state_publisher_node)
+
+
+
+    laser = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([bringup_dir,'/launch','/laser.launch.py']),
+        launch_arguments={
+            'namespace': namespace,
+            'use_sim_time': use_sim_time,
+            'log_level': log_level,
+            'description': description_name,
+        }.items(),
+    )
+    ld.add_action(laser)
 
     robot_controllers = PathJoinSubstitution(
         [
@@ -53,42 +84,25 @@ def generate_launch_description():
             'controller.yaml',
         ]
     )
+    controller_manager_name = PathJoinSubstitution([namespace, 'controller_manager'])
+    
+    
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        namespace=namespace,
-        arguments=[
-            'joint_state_broadcaster',
-            '-c', '/r1/controller_manager'
-            ],
+        remappings=remappings,
+        arguments=[ 'joint_state_broadcaster', '--param-file', robot_controllers, '-c', controller_manager_name],
     )
     ld.add_action(joint_state_broadcaster_spawner)
+    
 
-    controller_spawner = Node(
+    drive_base_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        namespace=namespace,
-        arguments=[
-            'drive_base_controller',
-            '--param-file',
-            robot_controllers,
-            '-c', '/r1/controller_manager'
-            ],
+        remappings=remappings,
+        arguments=['drive_base_controller','--param-file',robot_controllers,'-c', controller_manager_name],
     )
-    ld.add_action(controller_spawner)
-
-    # laser = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([bringup_dir,'/launch','/laser.launch.py']),
-    #     launch_arguments={
-    #         'namespace': namespace,
-    #         'use_sim_time': use_sim_time,
-    #         'autostart': autostart,
-    #         'log_level': log_level,
-    #         'description': description_name,
-    #     }.items(),
-    # )
-    # ld.add_action(laser)
-
-
-
+    ld.add_action(drive_base_controller_spawner)
+    
+    
     return ld

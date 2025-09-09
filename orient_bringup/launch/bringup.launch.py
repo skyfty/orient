@@ -6,7 +6,6 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
-from orient_common.launch import ReplacePath
 from nav2_common.launch import RewrittenYaml
 from launch_ros.descriptions import ParameterFile
 from launch.actions import DeclareLaunchArgument, GroupAction
@@ -18,15 +17,12 @@ from launch_ros.actions import PushRosNamespace
 from nav2_common.launch import RewrittenYaml, ReplaceString
 from launch.actions import (DeclareLaunchArgument, GroupAction,
                             IncludeLaunchDescription, SetEnvironmentVariable)
-from launch.actions import ExecuteProcess
-from launch.conditions import UnlessCondition
 
-from launch.event_handlers import OnProcessStart
-from launch.events import Shutdown
-from launch.actions import ExecuteProcess, DeclareLaunchArgument, RegisterEventHandler, EmitEvent
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, EnvironmentVariable
 
 def generate_launch_description():
-    #=============================1.定位到包的地址=============================================================
+
     bringup_dir = get_package_share_directory('orient_bringup')
     description_dir = get_package_share_directory('orient_description')
 
@@ -41,10 +37,10 @@ def generate_launch_description():
 
     description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
     orient_clientid = LaunchConfiguration('orient_clientid', default=os.getenv('ORIENT_CLIENTID', description_name))
-    nav_graph_filename = LaunchConfiguration('nav_graph_file', default=os.path.join(bringup_dir, 'nav_graphs','0.yaml'))
-    map_filename = LaunchConfiguration('map', default=os.path.join(bringup_dir, 'maps','reflector.yaml'))
- 
-    behaviors_dir = ReplacePath(name=description_name,path=description_dir,source_file='behaviors')
+
+    map_dir = LaunchConfiguration('map', default=os.path.join(get_package_share_directory('demo_maps'),'maps','office'))
+    nav_graph_file = PathJoinSubstitution([map_dir, 'nav_graphs', '0.yaml'])
+    map_filename = PathJoinSubstitution([map_dir,'map.yaml'])
 
     remappings = [('/tf', 'tf'), ('/tf_static', 'tf_static')]
     
@@ -53,19 +49,12 @@ def generate_launch_description():
         'autostart': autostart,
         'orient_clientid': orient_clientid
     }
-    
-    param_path = ReplacePath(
-        name=description_name,
-        path=description_dir,
-        source_file=os.path.join('params','params.yaml'))
-    
-    default_nav_bt_xml = ReplacePath(
-        name=description_name,
-        path=description_dir,
-        source_file=os.path.join('behaviors','default.xml'))
+
+    params_path = PathJoinSubstitution([description_dir, description_name, 'params', 'params.yaml'])
+    default_nav_bt_xml = PathJoinSubstitution([description_dir, description_name, 'behaviors', 'default.xml'])
     
     params_file = ReplaceString(
-        source_file=param_path,
+        source_file=params_path,
         replacements={'<robot_namespace>': ('/', namespace)},
         condition=IfCondition(use_namespace))
 
@@ -139,17 +128,12 @@ def generate_launch_description():
         description='description name'))
     
     ld.add_action(DeclareLaunchArgument(
-        'map', default_value=map_filename,
+        'map', default_value="",
         description='Full path to amcl map yaml file'))
     
     ld.add_action(DeclareLaunchArgument(
         'orient_clientid', default_value=orient_clientid,
         description='Orient client id'))
-
-    declare_nav_graph_cmd = DeclareLaunchArgument(
-        'nav_graph_file', default_value=nav_graph_filename,
-        description='Full path to nav_graph yaml file')
-    ld.add_action(declare_nav_graph_cmd)
 
     robot = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([bringup_dir,'/launch','/robot.launch.py']),
@@ -173,8 +157,8 @@ def generate_launch_description():
         }.items(),
     )
     ld.add_action(agent)
-
-
+    
+    
     orient_monitor = GroupAction([
         PushRosNamespace(
             condition=IfCondition(use_namespace),
@@ -190,12 +174,13 @@ def generate_launch_description():
                 {'use_sim_time': use_sim_time},
                 {'yaml_filename':map_filename}
             ],
-            remappings=remappings
+            remappings=remappings,
         ),
         Node(
             package='nav2_lifecycle_manager',
             executable='lifecycle_manager',
             name='lifecycle_manager_monitor',
+            remappings=remappings,
             parameters=[{
                 'bond_timeout': 120000.0,
                 'use_sim_time': use_sim_time,
@@ -222,19 +207,7 @@ def generate_launch_description():
                 configured_params,
                 {'use_sim_time': use_sim_time},
             ],
-            remappings=remappings
-        ),
-        Node(
-            package='orient_aide',
-            executable='dac63004',
-            name='orient_dac63004_node',
-            output='screen',
-            arguments=['--ros-args', '--log-level', log_level],
-            parameters=[
-                configured_params,
-                {'use_sim_time': use_sim_time},
-            ],
-            remappings=remappings
+            remappings=remappings,
         ),
     ])
     ld.add_action(aide_node)
@@ -245,18 +218,6 @@ def generate_launch_description():
             condition=IfCondition(use_namespace),
             namespace=namespace),
         Node(
-            package='orient_laser_odometry',
-            executable='orient_laser_odometry',
-            name='orient_laser_odometry',
-            output='screen',
-            parameters=[
-                configured_params,
-                {'use_sim_time': use_sim_time},
-            ],
-            arguments=['--ros-args', '--log-level', log_level],
-            remappings=remappings + [('scan', 'scan/filtered')],
-        ),
-        Node(
             package='robot_localization',
             executable='ekf_node',
             name='robot_localization_node',
@@ -266,7 +227,7 @@ def generate_launch_description():
                 {'use_sim_time': use_sim_time},
             ],
             arguments=['--ros-args', '--log-level', log_level],
-            remappings=remappings 
+            remappings=remappings,
         )
     ])
     ld.add_action(robot_localization_node)
@@ -279,7 +240,7 @@ def generate_launch_description():
             parameters=[configured_params, {'autostart': autostart}],
             arguments=['--ros-args', '--log-level', log_level],
             remappings=remappings,
-            namespace=namespace
+            namespace=namespace,
             output='screen')
     ld.add_action(component_container)
 
@@ -317,7 +278,7 @@ def generate_launch_description():
             ],
         )
     ])
-    # ld.add_action(orient_amcl_group)
+    ld.add_action(orient_amcl_group)
 
 
     reflector_group = GroupAction([
@@ -367,7 +328,7 @@ def generate_launch_description():
             ],
         )
     ])
-    ld.add_action(reflector_group)
+    # ld.add_action(reflector_group)
 
 
     # Specify the actions
@@ -394,24 +355,25 @@ def generate_launch_description():
                     package="orient_checkpoint",
                     plugin='orient_checkpoint::CheckpointServer',
                     name='checkpoint_server',
+                    remappings=remappings,
                     parameters=[
                         configured_params,
                         {'use_sim_time': use_sim_time},
                         {'orient_clientid': orient_clientid},
                         {'map':map_filename},
-                        {'nav_graph_file':nav_graph_filename}
+                        {'nav_graph_file':nav_graph_file}
                     ],
                 ),
                 ComposableNode(
                     package="orient_govern",
                     plugin='orient_govern::Govern',
-                    remappings=remappings,
+                    namespace=namespace,
                     name='govern_server',
                     parameters=[
                         configured_params,
                         {'use_sim_time': use_sim_time},
                         {'orient_clientid': orient_clientid},
-                        {'behaviors': behaviors_dir},
+                        {'behaviors': PathJoinSubstitution([description_dir, description_name, 'behaviors'])},
                         {'default_nav_through_poses_bt_xml': default_nav_bt_xml},
                     ],
                 ),
