@@ -154,7 +154,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 -0 0" />
             <geometry>
-                <mesh filename="package://orient_description/fishbot/meshes/sensors/R2000.stl" scale="0.001 0.001 0.001" />
+                <mesh filename="package://orient_description/fishbot/meshes/sensors/R2000.dae" scale="0.001 0.001 0.001" />
             </geometry>
         </visual>
         <collision>

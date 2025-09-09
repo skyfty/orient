@@ -36,15 +36,16 @@ include_directories(include)
 
 #########
 
-add_library(orient_gazebo_plugins-system SHARED
+add_library(orient_gazebo_plugins SHARED
   src/gz_ros2_control_plugin.cpp
+  src/gz_system.cpp
 )
 
-target_link_libraries(orient_gazebo_plugins-system
+target_link_libraries(orient_gazebo_plugins
   ${GZ_SIM}
   ${GZ_PLUGIN}
 )
-ament_target_dependencies(orient_gazebo_plugins-system
+ament_target_dependencies(orient_gazebo_plugins
   ament_index_cpp
   controller_manager
   hardware_interface
@@ -54,23 +55,10 @@ ament_target_dependencies(orient_gazebo_plugins-system
   rclcpp_lifecycle
 )
 
-#########
-
-add_library(orient_gazebo_plugins_hardware_plugins SHARED
-  src/gz_system.cpp
-)
-ament_target_dependencies(orient_gazebo_plugins_hardware_plugins
-  rclcpp_lifecycle
-  hardware_interface
-  rclcpp
-)
-target_link_libraries(orient_gazebo_plugins_hardware_plugins
-  ${GZ_SIM}
-)
 
 ## Install
 install(TARGETS
-  orient_gazebo_plugins_hardware_plugins
+  orient_gazebo_plugins
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -83,12 +71,8 @@ install(DIRECTORY
 
 
 ament_export_include_directories(include)
-ament_export_libraries(orient_gazebo_plugins_hardware_plugins-system gz_hardware_plugins)
+ament_export_libraries(orient_gazebo_plugins gz_hardware_plugins)
 
-# Install directories
-install(TARGETS orient_gazebo_plugins-system
-  DESTINATION lib
-)
 pluginlib_export_plugin_description_file(orient_gazebo_plugins gz_hardware_plugins.xml)
 
 # Setup the project
