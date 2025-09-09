@@ -8,10 +8,8 @@ from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from orient_common.launch import ReplacePath
 from launch.substitutions import Command, LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.conditions import UnlessCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, EnvironmentVariable
 from launch.substitutions import TextSubstitution
 
@@ -65,16 +63,16 @@ def generate_launch_description():
 
 
 
-    laser = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([bringup_dir,'/launch','/laser.launch.py']),
-        launch_arguments={
-            'namespace': namespace,
-            'use_sim_time': use_sim_time,
-            'log_level': log_level,
-            'description': description_name,
-        }.items(),
-    )
-    ld.add_action(laser)
+    # laser = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([bringup_dir,'/launch','/laser.launch.py']),
+    #     launch_arguments={
+    #         'namespace': namespace,
+    #         'use_sim_time': use_sim_time,
+    #         'log_level': log_level,
+    #         'description': description_name,
+    #     }.items(),
+    # )
+    # ld.add_action(laser)
 
     robot_controllers = PathJoinSubstitution(
         [

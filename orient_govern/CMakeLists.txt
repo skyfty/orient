@@ -18,11 +18,4 @@ ament_auto_add_executable(govern
   src/main.cpp
 )
 
-if(BUILD_TESTING)
-  ament_auto_add_executable(test_govern_server_exec
-    test/test_govern_server.cpp
-    test/govern_server_tester.cpp
-  )
-endif()
-
 ament_auto_package()

@@ -11,6 +11,6 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
-install(DIRECTORY launch maps worlds rviz nav_graphs DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch  rviz DESTINATION share/${PROJECT_NAME})
 
 ament_auto_package()

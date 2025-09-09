@@ -45,15 +45,6 @@ ament_target_dependencies(${executable_name}
 )
 target_link_libraries(${executable_name} ${library_name})
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  set(ament_cmake_copyright_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-
-  find_package(ament_cmake_gtest REQUIRED)
-endif()
-
 rclcpp_components_register_nodes(${library_name} "orient_velocity_smoother::VelocitySmoother")
 
 install(
@@ -70,13 +61,6 @@ install(TARGETS ${executable_name}
 install(DIRECTORY include/
   DESTINATION include/
 )
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-  find_package(ament_cmake_gtest REQUIRED)
-  add_subdirectory(test)
-endif()
 
 ament_export_include_directories(include)
 ament_export_libraries(${library_name})

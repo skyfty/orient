@@ -18,15 +18,15 @@ import os
 from typing import Iterable
 from typing import List
 from typing import Text
-from ..launch_context import LaunchContext
-from ..some_substitutions_type import SomeSubstitutionsType
-from ..substitution import Substitution
-from ..utilities import normalize_to_list_of_substitutions
-from ..utilities import perform_substitutions
+from typing import List
+from typing import Text
+import launch
+import tempfile
+from launch.utilities import normalize_to_list_of_substitutions  # import here to avoid loop
 
-class EnvPathJoinSubstitution(Substitution):
+class EnvPathJoinSubstitution(launch.Substitution):
 
-    def __init__(self, substitutions: Iterable[SomeSubstitutionsType]) -> None:
+    def __init__(self, substitutions: Iterable[launch.SomeSubstitutionsType]) -> None:
         """Create a PathJoinSubstitution substitution."""
         self.__substitutions = [
             normalize_to_list_of_substitutions(substitution)
@@ -35,7 +35,7 @@ class EnvPathJoinSubstitution(Substitution):
  
 
     @property
-    def substitutions(self) -> List[List[Substitution]]:
+    def substitutions(self) -> List[List[launch.Substitution]]:
         """Getter for variable_name."""
         return self.__substitutions
 
@@ -47,15 +47,15 @@ class EnvPathJoinSubstitution(Substitution):
         ]
         return f"EnvPathJoinSubstitution('{', '.join(path_components)}')"
 
-    def perform(self, context: LaunchContext) -> Text:
+    def perform(self, context: launch.LaunchContext) -> Text:
         """Perform the substitutions and join into a path."""
         path_components = [
-            perform_substitutions(context, component_substitutions)
+            launch.utilities.perform_substitutions(context, component_substitutions)
             for component_substitutions in self.substitutions
         ]
         return ":".join(path_components)
 
-    def __truediv__(self, additional_path: SomeSubstitutionsType) -> 'EnvPathJoinSubstitution':
+    def __truediv__(self, additional_path: launch.SomeSubstitutionsType) -> 'EnvPathJoinSubstitution':
         """Join path substitutions using the / operator, mimicking pathlib.Path operation."""
         return EnvPathJoinSubstitution(
             self.substitutions + [normalize_to_list_of_substitutions(additional_path)])
