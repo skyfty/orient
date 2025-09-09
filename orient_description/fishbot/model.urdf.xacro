@@ -285,8 +285,8 @@
           <always_on>1</always_on>
           <update_rate>100</update_rate>
           <visualize>true</visualize>
-          <topic>imu</topic>
+          <topic>imu/data</topic>
           <enable_metrics>true</enable_metrics>
         </sensor>
-    </gzebo>
+    </gazebo>
 </robot>
