@@ -16,7 +16,6 @@ from launch.conditions import UnlessCondition
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     namespace = LaunchConfiguration('namespace', default='')
-    autostart = LaunchConfiguration('autostart', default='True')
     log_level = LaunchConfiguration('log_level', default="info")
 
     description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'kf2404'))  
@@ -47,6 +46,11 @@ def generate_launch_description():
         default_value='true',
         description='Use simulation (Gazebo) clock if true')
     ld.add_action(declare_use_sim_time_cmd)
+    
+    declare_namespace_cmd = DeclareLaunchArgument(
+        'namespace', default_value='',
+        description='Top-level namespace')
+    ld.add_action(declare_namespace_cmd)
 
 
     remappings = [
@@ -56,8 +60,7 @@ def generate_launch_description():
 
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {
-        'use_sim_time': use_sim_time,
-        'autostart': autostart}
+        'use_sim_time': use_sim_time}
 
     agent_params = ParameterFile(
         RewrittenYaml(
@@ -74,6 +77,7 @@ def generate_launch_description():
         executable='orient_mqtt',
         output='screen',
         remappings=remappings,
+        namespace=namespace,
         arguments=['--ros-args', '--log-level', log_level],
         parameters=[
             agent_params,
