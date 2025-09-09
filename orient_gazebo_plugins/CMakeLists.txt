@@ -10,76 +10,86 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
-# Qt5 boilerplate options from http://doc.qt.io/qt-5/cmake-manual.html
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Compiler options
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
+# Find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(gazebo_dev REQUIRED)
-find_package(gazebo_ros REQUIRED)
-find_package(gazebo_msgs REQUIRED)
+find_package(ament_index_cpp REQUIRED)
+find_package(controller_manager REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(sensor_msgs REQUIRED)
-find_package(urdf REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(nav_msgs REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
+find_package(yaml_cpp_vendor REQUIRED)
 
-include_directories(
-  include
+find_package(ignition-gazebo6 REQUIRED)
+set(GZ_SIM_VER ${ignition-gazebo6_VERSION_MAJOR})
+message(STATUS "Compiling against Gazebo fortress")
+find_package(ignition-plugin1 REQUIRED)
+set(GZ_PLUGIN_VER ${ignition-plugin1_VERSION_MAJOR})
+set(GZ_PLUGIN ignition-plugin${GZ_PLUGIN_VER}::register)
+set(GZ_SIM ignition-gazebo${GZ_SIM_VER}::core)
+
+include_directories(include)
+
+#########
+
+add_library(orient_gazebo_plugins-system SHARED
+  src/gz_ros2_control_plugin.cpp
 )
 
-set(dependencies
-  gazebo_dev
-  gazebo_ros
-  gazebo_msgs
+target_link_libraries(orient_gazebo_plugins-system
+  ${GZ_SIM}
+  ${GZ_PLUGIN}
+)
+ament_target_dependencies(orient_gazebo_plugins-system
+  ament_index_cpp
+  controller_manager
+  hardware_interface
+  pluginlib
   rclcpp
-  geometry_msgs
-  urdf
-  nav_msgs
-  tf2_geometry_msgs
-  sensor_msgs
+  yaml_cpp_vendor
+  rclcpp_lifecycle
 )
 
-add_library(gazebo_ros_ackermann_drive SHARED
-  src/gazebo_ros_ackermann_drive.cpp
+#########
+
+add_library(orient_gazebo_plugins_hardware_plugins SHARED
+  src/gz_system.cpp
 )
-ament_target_dependencies(gazebo_ros_ackermann_drive ${dependencies} )
-target_include_directories(gazebo_ros_ackermann_drive PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+ament_target_dependencies(orient_gazebo_plugins_hardware_plugins
+  rclcpp_lifecycle
+  hardware_interface
+  rclcpp
 )
+target_link_libraries(orient_gazebo_plugins_hardware_plugins
+  ${GZ_SIM}
+)
+
+## Install
 install(TARGETS
-  gazebo_ros_ackermann_drive 
+  orient_gazebo_plugins_hardware_plugins
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION bin
 )
 
-add_library(gazebo_actor_collisions_plugin SHARED
-  src/actor_collisions_plugin.cpp
-)
-ament_target_dependencies(gazebo_actor_collisions_plugin ${dependencies})
-target_include_directories(gazebo_actor_collisions_plugin PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-install(TARGETS
-  gazebo_actor_collisions_plugin
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+install(DIRECTORY
+  include/
+  DESTINATION include
 )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-)
 
 ament_export_include_directories(include)
-ament_export_libraries(gazebo_ros_ackermann_drive)
-ament_export_libraries(gazebo_actor_collisions_plugin)
-ament_export_dependencies(gazebo_dev)
-ament_export_dependencies(gazebo_ros)
-ament_export_dependencies(gazebo_msgs)
-ament_export_dependencies(rclcpp)
-ament_export_dependencies(sensor_msgs)
+ament_export_libraries(orient_gazebo_plugins_hardware_plugins-system gz_hardware_plugins)
+
+# Install directories
+install(TARGETS orient_gazebo_plugins-system
+  DESTINATION lib
+)
+pluginlib_export_plugin_description_file(orient_gazebo_plugins gz_hardware_plugins.xml)
+
+# Setup the project
 ament_package()

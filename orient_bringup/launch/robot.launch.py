@@ -56,6 +56,7 @@ def generate_launch_description():
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
+        namespace=namespace,
         arguments=[
             'joint_state_broadcaster',
             '-c', '/r1/controller_manager'
@@ -66,6 +67,7 @@ def generate_launch_description():
     controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
+        namespace=namespace,
         arguments=[
             'drive_base_controller',
             '--param-file',
