@@ -18,7 +18,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace', default='')
     log_level = LaunchConfiguration('log_level', default="info")
 
-    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'kf2404'))  
+    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))  
     orient_clientid = LaunchConfiguration('orient_clientid', default=os.getenv('ORIENT_CLIENTID', description_name))
 
     agent_params_filename = ReplacePath(

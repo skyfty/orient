@@ -14,7 +14,7 @@ from nav2_common.launch import RewrittenYaml
 from launch.conditions import UnlessCondition
 
 def generate_launch_description():
-    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'kf2404'))
+    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
     params_path = ReplacePath(
         name=description_name,
         path=get_package_share_directory('orient_description'),

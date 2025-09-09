@@ -22,7 +22,7 @@ def generate_launch_description():
     orient_fleet_dir = get_package_share_directory('orient_fleet')
     description_dir = get_package_share_directory('orient_description')
 
-    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'kf2404'))
+    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
 
     namespace = LaunchConfiguration('namespace', default='')

@@ -19,7 +19,7 @@ def generate_launch_description():
     # Get the launch directory
     bringup_dir = get_package_share_directory('orient_bringup')
     launch_dir = os.path.join(bringup_dir, 'launch')
-    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'kf2404'))
+    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     # Create the launch configuration variables

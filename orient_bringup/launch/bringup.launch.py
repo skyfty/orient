@@ -39,7 +39,7 @@ def generate_launch_description():
     container_name = LaunchConfiguration('container_name')
     container_name_full = (namespace, '/', container_name)
 
-    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'kf2404'))
+    description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
     orient_clientid = LaunchConfiguration('orient_clientid', default=os.getenv('ORIENT_CLIENTID', description_name))
     nav_graph_filename = LaunchConfiguration('nav_graph_file', default=os.path.join(bringup_dir, 'nav_graphs','0.yaml'))
     map_filename = LaunchConfiguration('map', default=os.path.join(bringup_dir, 'maps','reflector.yaml'))
@@ -279,10 +279,14 @@ def generate_launch_description():
             parameters=[configured_params, {'autostart': autostart}],
             arguments=['--ros-args', '--log-level', log_level],
             remappings=remappings,
+            namespace=namespace
             output='screen')
     ld.add_action(component_container)
 
     orient_amcl_group = GroupAction([
+        PushRosNamespace(
+            condition=IfCondition(use_namespace),
+            namespace=namespace),
         LoadComposableNodes(
             condition=IfCondition(use_composition),
             target_container=container_name_full,
