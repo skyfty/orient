@@ -14,12 +14,9 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Envi
 from launch.substitutions import TextSubstitution
 
 def generate_launch_description():
-    bringup_dir = get_package_share_directory('orient_bringup')
     orient_description_share_dir = get_package_share_directory('orient_description')
     description_name = LaunchConfiguration('description', default=os.getenv('ORIENT_DESCRIPTION', 'fishbot'))
 
-    use_sim_time = LaunchConfiguration('use_sim_time', default='True')
-    log_level = LaunchConfiguration('log_level', default="info")
     namespace = LaunchConfiguration('namespace', default='')
     
     urdf_model_path = PathJoinSubstitution([
@@ -50,9 +47,7 @@ def generate_launch_description():
     robot_state_publisher_node = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        arguments=['--ros-args', '--log-level', log_level],
         parameters=[{
-            'use_sim_time': use_sim_time,
             'robot_description': Command(['xacro ', urdf_model_path, ' namespace:=', namespace]),
         }],
         remappings=remappings,

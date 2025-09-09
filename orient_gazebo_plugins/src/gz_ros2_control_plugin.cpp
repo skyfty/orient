@@ -275,6 +275,9 @@ void GazeboSimROS2ControlPlugin::Configure(
     return;
   }
 
+  RCLCPP_INFO(
+    logger,
+    "dddddddddddddddddddddddddddddddddddddddddd is %s", paramFileName.c_str());
   // Get params from SDF
   std::string robot_param_node = _sdf->Get<std::string>("robot_param_node");
   if (!robot_param_node.empty()) {
