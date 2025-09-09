@@ -10,8 +10,8 @@
 
 /**/drive_base_controller:
   ros__parameters:
-    left_wheel_names: ["left_wheel_joint"]
-    right_wheel_names: ["right_wheel_joint"]
+    left_wheel_names: ["joint_tire_left"]
+    right_wheel_names: ["joint_tire_right"]
 
     wheel_separation: 1.25
     #wheels_per_side: 1  # actually 2, but both are controlled by 1 signal
