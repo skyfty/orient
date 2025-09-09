@@ -9,9 +9,11 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from orient_common.launch import ReplacePath
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, EnvironmentVariable
 from launch.substitutions import Command, LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.conditions import UnlessCondition
+from launch.substitutions import TextSubstitution
 
 def generate_launch_description():
     bringup_dir = get_package_share_directory('orient_bringup')
@@ -22,10 +24,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace', default='')
     autostart = LaunchConfiguration('autostart', default='True')
 
-    urdf_model_path = ReplacePath(
-        name=description_name,
-        path=get_package_share_directory('orient_description'),
-        source_file=os.path.join('urdf','robot.urdf.xacro'))
+    urdf_model_path = PathJoinSubstitution([get_package_share_directory('orient_description') ,description_name,os.path.join('urdf','model.urdf.xacro')])
     ld = LaunchDescription()
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -48,17 +47,17 @@ def generate_launch_description():
     ld.add_action(robot_state_publisher_node)
 
 
-    laser = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([bringup_dir,'/launch','/laser.launch.py']),
-        launch_arguments={
-            'namespace': namespace,
-            'use_sim_time': use_sim_time,
-            'autostart': autostart,
-            'log_level': log_level,
-            'description': description_name,
-        }.items(),
-    )
-    ld.add_action(laser)
+    # laser = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([bringup_dir,'/launch','/laser.launch.py']),
+    #     launch_arguments={
+    #         'namespace': namespace,
+    #         'use_sim_time': use_sim_time,
+    #         'autostart': autostart,
+    #         'log_level': log_level,
+    #         'description': description_name,
+    #     }.items(),
+    # )
+    # ld.add_action(laser)
 
 
 
